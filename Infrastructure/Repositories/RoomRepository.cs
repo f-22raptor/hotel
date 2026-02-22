@@ -1,5 +1,6 @@
 using Domain.Models;
 using Domain.Repositories;
+using Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories;
@@ -11,43 +12,47 @@ public class RoomRepository(AppDbContext context) : BaseRepository<Room, Guid>(c
         return context.Rooms.Include(r => r.Hotel).Include(r => r.Reservations);
     }
 
-    protected override IQueryable<Room> ApplySorting(IQueryable<Room> query, IReadOnlyList<SortOption>? sorts)
+    protected override IQueryable<Room> CustomFilter(IQueryable<Room> query, string? filterOn, string? filterQuery)
     {
-        if (sorts == null || sorts.Count == 0)
+        if (!string.IsNullOrWhiteSpace(filterOn) && !string.IsNullOrWhiteSpace(filterQuery))
         {
-            return query.OrderBy(r => r.Number);
-        }
-
-        IOrderedQueryable<Room>? orderedQuery = null;
-        foreach (var sort in sorts)
-        {
-            orderedQuery = sort.Field.ToLowerInvariant() switch
+            // filter by room number
+            if (filterOn.Equals("Number", StringComparison.OrdinalIgnoreCase)) // case-insensitive
             {
-                "name" or "hotelname" => ApplyOrder(orderedQuery, query, r => r.Hotel.Name, sort.Direction),
-                "price" => ApplyOrder(orderedQuery, query, r => r.PricePerNight, sort.Direction),
-                "number" => ApplyOrder(orderedQuery, query, r => r.Number, sort.Direction),
-                _ => orderedQuery
-            };
+                query = query.Where(r => r.Number.ToString().Contains(filterQuery));
+            }
+
+            // filter by room type
+            if (filterOn.Equals("Type", StringComparison.OrdinalIgnoreCase))
+            {
+                // convert enum RoomType to string
+                if (Enum.TryParse<RoomType>(filterQuery, true, out var type))
+                {
+                    query = query.Where(r => r.Type == type);
+                }
+            }
         }
 
-        return orderedQuery ?? query.OrderBy(r => r.Number);
+        return query;
     }
 
-    private static IOrderedQueryable<Room> ApplyOrder<TProperty>(
-        IOrderedQueryable<Room>? orderedQuery,
-        IQueryable<Room> query,
-        System.Linq.Expressions.Expression<Func<Room, TProperty>> keySelector,
-        SortDirection direction)
+    protected override IQueryable<Room> CustomSort(IQueryable<Room> query, string? orderBy, bool isAscending)
     {
-        if (orderedQuery == null)
+        if (!string.IsNullOrWhiteSpace(orderBy))
         {
-            return direction == SortDirection.Asc
-                ? query.OrderBy(keySelector)
-                : query.OrderByDescending(keySelector);
+            // sort by room number
+            if (orderBy.Equals("Number", StringComparison.OrdinalIgnoreCase))
+                query = isAscending
+                    ? query.OrderBy(r => r.Number)
+                    : query.OrderByDescending(r => r.Number);
+
+            // sort by room PricePerNight
+            if (orderBy.Equals("PricePerNight", StringComparison.OrdinalIgnoreCase))
+                query = isAscending
+                    ? query.OrderBy(r => r.PricePerNight)
+                    : query.OrderByDescending(r => r.PricePerNight);
         }
 
-        return direction == SortDirection.Asc
-            ? orderedQuery.ThenBy(keySelector)
-            : orderedQuery.ThenByDescending(keySelector);
+        return query;
     }
 }

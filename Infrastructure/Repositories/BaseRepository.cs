@@ -8,26 +8,25 @@ public abstract class BaseRepository<TEntity, TKey>(AppDbContext context) : IBas
     where TEntity : class, IBaseModel<TKey>
     where TKey : IEquatable<TKey>
 {
-    public virtual async Task<ICollection<TEntity>> GetAllAsync(QueryOptions? options = null)
+    public virtual async Task<ICollection<TEntity>> GetAllAsync(string? filterOn = null, string? filterQuery = null,
+        string? orderBy = null, bool isAscending = true, 
+        int pageNumber = 1, int pageSize = int.MaxValue)
     {
-        options ??= new QueryOptions();
+        var query = CustomContext();
 
-        var query = ApplySorting(CustomContext(), options.Sorts);
-        return await query
-            .Skip((options.PageNumber - 1) * options.PageSize)
-            .Take(options.PageSize)
-            .ToListAsync();
-    }
+        // filtering
+        query = CustomFilter(query, filterOn, filterQuery);
+        // sorting
+        query = CustomSort(query, orderBy, isAscending);
+        // pagination
+        query = query.Skip((pageNumber - 1) * pageSize).Take(pageSize);
 
-    public virtual Task<ICollection<TEntity>> GetAllAsync(int pageNumber = 1, int pageSize = 10)
-    {
-        return GetAllAsync(new QueryOptions(pageNumber, pageSize));
+        return await query.ToListAsync();
     }
 
     public virtual async Task<TEntity?> GetByIdAsync(TKey id)
     {
-        return await CustomContext()
-            .FirstOrDefaultAsync(e => e.Id.Equals(id));
+        return await CustomContext().FirstOrDefaultAsync(e => e.Id.Equals(id));
     }
 
     public virtual async Task<TEntity?> InsertAsync(TEntity entity)
@@ -47,7 +46,8 @@ public abstract class BaseRepository<TEntity, TKey>(AppDbContext context) : IBas
     public virtual async Task<TEntity?> DeleteAsync(TKey id)
     {
         var entity = await GetByIdAsync(id);
-        if (entity == null) return null;
+        if (entity == null)
+            return null;
 
         context.Set<TEntity>().Remove(entity);
         await context.SaveChangesAsync();
@@ -55,11 +55,6 @@ public abstract class BaseRepository<TEntity, TKey>(AppDbContext context) : IBas
     }
 
     protected abstract IQueryable<TEntity> CustomContext();
-
-    protected virtual IQueryable<TEntity> ApplySorting(
-        IQueryable<TEntity> query,
-        IReadOnlyList<SortOption>? sorts)
-    {
-        return query;
-    }
+    protected abstract IQueryable<TEntity> CustomFilter(IQueryable<TEntity> query, string? filterOn, string? filterQuery);
+    protected abstract IQueryable<TEntity> CustomSort(IQueryable<TEntity> query, string? orderBy, bool isAscending);
 }
