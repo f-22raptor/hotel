@@ -9,9 +9,9 @@ public class Reservation : IBaseModel<Guid>
     public DateTimeOffset CheckOutDate { get; set; }
     public decimal TotalPrice { get; set; }
     // foreign key
-    public required Guid GuestId { get; set; }
-    public required Guid RoomId { get; set; }
+    public Guid? GuestId { get; set; }
+    public Guid? RoomId { get; set; }
     // navigation property
-    public required Guest Guest { get; set; }
-    public required Room Room { get; set; }
+    public Guest? Guest { get; set; }
+    public Room? Room { get; set; }
 }

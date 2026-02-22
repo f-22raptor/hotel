@@ -1,11 +1,9 @@
-﻿namespace Domain.Models;
+namespace Application.Hotels.HotelDtos;
 
-public class Hotel : IBaseModel<Guid>
+public class HotelDto
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Address { get; set; } = string.Empty;
     public float Rating { get; set; }
-    // navigation property
-    public ICollection<Room> Rooms { get; set; } = [];
 }

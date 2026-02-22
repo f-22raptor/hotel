@@ -8,7 +8,9 @@ public abstract class BaseRepository<TEntity, TKey>(AppDbContext context) : IBas
     where TEntity : class, IBaseModel<TKey>
     where TKey : IEquatable<TKey>
 {
-    public virtual async Task<ICollection<TEntity>> GetAllAsync(string? filterOn = null, string? filterQuery = null,
+    public virtual async Task<ICollection<TEntity>> GetAllAsync(
+        CancellationToken cancellationToken,
+        string? filterOn = null, string? filterQuery = null,
         string? orderBy = null, bool isAscending = true, 
         int pageNumber = 1, int pageSize = int.MaxValue)
     {
@@ -21,36 +23,36 @@ public abstract class BaseRepository<TEntity, TKey>(AppDbContext context) : IBas
         // pagination
         query = query.Skip((pageNumber - 1) * pageSize).Take(pageSize);
 
-        return await query.ToListAsync();
+        return await query.ToListAsync(cancellationToken: cancellationToken);
     }
 
-    public virtual async Task<TEntity?> GetByIdAsync(TKey id)
+    public virtual async Task<TEntity?> GetByIdAsync(TKey id, CancellationToken cancellationToken)
     {
-        return await CustomContext().FirstOrDefaultAsync(e => e.Id.Equals(id));
+        return await CustomContext().FirstOrDefaultAsync(e => e.Id.Equals(id), cancellationToken: cancellationToken);
     }
 
-    public virtual async Task<TEntity?> InsertAsync(TEntity entity)
+    public virtual async Task<TEntity?> InsertAsync(TEntity entity, CancellationToken cancellationToken)
     {
-        await context.Set<TEntity>().AddAsync(entity);
-        await context.SaveChangesAsync();
+        await context.Set<TEntity>().AddAsync(entity, cancellationToken);
+        await context.SaveChangesAsync(cancellationToken);
         return entity;
     }
 
-    public virtual async Task<TEntity?> UpdateAsync(TEntity entity)
+    public virtual async Task<TEntity?> UpdateAsync(TEntity entity, CancellationToken cancellationToken)
     {
         context.Set<TEntity>().Update(entity);
-        await context.SaveChangesAsync();
+        await context.SaveChangesAsync(cancellationToken);
         return entity;
     }
 
-    public virtual async Task<TEntity?> DeleteAsync(TKey id)
+    public virtual async Task<TEntity?> DeleteAsync(TKey id, CancellationToken cancellationToken)
     {
-        var entity = await GetByIdAsync(id);
+        var entity = await GetByIdAsync(id, cancellationToken);
         if (entity == null)
             return null;
 
         context.Set<TEntity>().Remove(entity);
-        await context.SaveChangesAsync();
+        await context.SaveChangesAsync(cancellationToken);
         return entity;
     }
 

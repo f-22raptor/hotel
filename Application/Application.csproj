@@ -8,6 +8,19 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Domain\Domain.csproj" />
+      <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Base\BaseCommands\" />
+      <Folder Include="Base\BaseHandlers\" />
+      <Folder Include="Hotels\HotelCommands\HotelCommandHandlers\" />
+      <Folder Include="Hotels\HotelCommands\HotelCommandRequests\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="AutoMapper" Version="16.0.0" />
+      <PackageReference Include="MediatR" Version="14.0.0" />
     </ItemGroup>
     
 </Project>

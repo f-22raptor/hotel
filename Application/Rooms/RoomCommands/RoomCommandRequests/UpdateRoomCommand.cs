@@ -1,16 +1,14 @@
+using Application.Rooms.RoomDtos;
 using Domain.Enums;
+using MediatR;
 
-namespace Domain.Models;
+namespace Application.Rooms.RoomCommands.RoomCommandRequests;
 
-public class Room : IBaseModel<Guid>
+public class UpdateRoomCommand : IRequest<RoomDto?>
 {
     public Guid Id { get; set; }
     public int Number { get; set; }
     public RoomType Type { get; set; }
     public decimal PricePerNight { get; set; }
-    // foreign key
     public Guid? HotelId { get; set; }
-    // navigation property
-    public Hotel? Hotel { get; set; }
-    public ICollection<Reservation> Reservations { get; set; } = [];
 }
