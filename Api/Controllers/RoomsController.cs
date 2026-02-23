@@ -39,6 +39,8 @@ public class RoomsController(IMediator mediator) : BaseController(mediator)
         try
         {
             var response = await mediator.Send(request, cancellationToken);
+            if (response == null)
+                return BadRequest($"room number {request.Number} already exists");
             return Ok(response);
         }
         catch (Exception e)
@@ -54,7 +56,7 @@ public class RoomsController(IMediator mediator) : BaseController(mediator)
     {
         request.Id = id;
         var response = await mediator.Send(request, cancellationToken);
-        if(response==null)
+        if (response == null)
             return NotFound($"room {id}  not found");
         return Ok(response);
     }

@@ -6,7 +6,7 @@ using MediatR;
 
 namespace Application.Rooms.RoomCommands.RoomCommandHandlers;
 
-public class DeleteRoomHandlerAsync(IRoomRepository roomRepository, IMapper mapper) : IRequestHandler<DeleteRoomCommand, RoomDto?>
+public class DeleteRoomHandler(IRoomRepository roomRepository, IMapper mapper) : IRequestHandler<DeleteRoomCommand, RoomDto?>
 {
     public async Task<RoomDto?> Handle(DeleteRoomCommand request, CancellationToken cancellationToken)
     {

@@ -7,15 +7,29 @@ namespace Infrastructure.Repositories;
 
 public class RoomRepository(AppDbContext context) : BaseRepository<Room, Guid>(context), IRoomRepository
 {
-    public override async Task<Room?> InsertAsync(Room entity, CancellationToken cancellationToken)
+    private async Task<bool> IsRoomNumberUniqueAsync(Room room, CancellationToken cancellationToken)
     {
         var isRoomNumberUnique =
-            !await context.Rooms.AnyAsync(r => r.Number == entity.Number, cancellationToken: cancellationToken);
-        if (isRoomNumberUnique)
-            await base.InsertAsync(entity, cancellationToken);
-        return 
+            !await context.Rooms.AnyAsync(r => r.Number == room.Number, cancellationToken);
+        return isRoomNumberUnique;
+    }
+    
+    public override async Task<Room?> InsertAsync(Room entity, CancellationToken cancellationToken)
+    {
+        var isRoomNumberUnique = await IsRoomNumberUniqueAsync(entity, cancellationToken);
+        if (!isRoomNumberUnique)
+            return null;
+        return await base.InsertAsync(entity, cancellationToken);
     }
 
+    public override async Task<Room?> UpdateAsync(Room entity, CancellationToken cancellationToken)
+    {
+        var isRoomNumberUnique = await IsRoomNumberUniqueAsync(entity, cancellationToken);
+        if (!isRoomNumberUnique)
+            return null;
+        return await base.UpdateAsync(entity, cancellationToken);
+    }
+    
     protected override IQueryable<Room> CustomContext()
     {
         return context.Rooms.Include(r => r.Hotel).Include(r => r.Reservations);

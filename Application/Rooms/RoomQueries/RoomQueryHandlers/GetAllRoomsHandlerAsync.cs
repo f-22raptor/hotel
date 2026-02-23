@@ -19,17 +19,6 @@ public class GetAllRoomsHandlerAsync(IRoomRepository roomRepository, IMapper map
             isAscending: request.IsAscending,
             pageNumber: request.PageNumber,
             pageSize: request.PageSize);
-        // test
-        // var room = new Room
-        // {
-        //     Number = 45
-        // };
-        // var rooms = new List<Room>()
-        // {
-        //     room,
-        //     room,
-        //     room
-        // };
         var roomDtos = mapper.Map<List<RoomDto>>(rooms);
         return  roomDtos;
     }
