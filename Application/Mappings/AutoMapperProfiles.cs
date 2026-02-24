@@ -12,8 +12,8 @@ public class AutoMapperProfiles : Profile
     public AutoMapperProfiles()
     {
         // room
-        CreateMap<Room, RoomDto>();
-            // .ForMember(dst => dst.HotelDto, opt => opt.MapFrom(src => src.Hotel));
+        CreateMap<Room, RoomDto>()
+            .ForMember(dst => dst.HotelDto, opt => opt.MapFrom(src => src.Hotel));
         CreateMap<InsertRoomCommand, Room>();
         CreateMap<UpdateRoomCommand, Room>();
         // hotel

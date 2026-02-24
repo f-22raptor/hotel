@@ -11,7 +11,6 @@ public class ReservationRepository(AppDbContext context)
     protected override IQueryable<Reservation> CustomContext()
     {
         return context.Reservations
-            .Include(r => r.Guest)
             .Include(r => r.Room);
     }
 
