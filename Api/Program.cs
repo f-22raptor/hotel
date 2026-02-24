@@ -49,6 +49,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                                                                 throw new Exception("Jwt:Key is null")))
         }
     );
+
+builder.Services.AddAuthorization();
+
 builder.Services.AddIdentityCore<IdentityUser>()
     .AddRoles<IdentityRole>()
     .AddTokenProvider<DataProtectorTokenProvider<IdentityUser>>("HOTEL")
@@ -71,6 +74,7 @@ builder.Services.AddScoped<ITokenRepository, TokenRepository>();
 var app = builder.Build();
 
 app.UseMiddleware<ExceptionMiddleware>();
+await DbInitializer.Seed(app);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

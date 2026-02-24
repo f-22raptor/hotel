@@ -31,12 +31,13 @@ public static class DbInitializer
         // seed users
         // const string guestEmail = "guest@yahoo.com";
         const string guestPhoneNumber = "+989123456789";
-        var guestUser = userManager.Users.FirstOrDefault(u => u.PhoneNumber == guestPhoneNumber);
+        var guestUser = await userManager.Users.FirstOrDefaultAsync(u => u.PhoneNumber == guestPhoneNumber);
         if (guestUser == null)
         {
             var guest = new IdentityUser
             {
                 PhoneNumber = guestPhoneNumber,
+                UserName = guestPhoneNumber
             };
 
             var result = await userManager.CreateAsync(guest, "1234");
@@ -46,12 +47,13 @@ public static class DbInitializer
 
         // const string adminEmail = "admin@yahoo.com";
         const string adminPhoneNumber = "+989184129577";
-        var adminUser = userManager.Users.FirstOrDefault(u => u.PhoneNumber == adminPhoneNumber);
+        var adminUser = await userManager.Users.FirstOrDefaultAsync(u => u.PhoneNumber == adminPhoneNumber);
         if (adminUser == null)
         {
             var user = new IdentityUser
             {
-                PhoneNumber = adminPhoneNumber
+                PhoneNumber = adminPhoneNumber,
+                UserName = adminPhoneNumber
             };
 
             var result = await userManager.CreateAsync(user, "1234");

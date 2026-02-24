@@ -1,6 +1,7 @@
 using Application.Rooms.RoomCommands.RoomCommandRequests;
 using Application.Rooms.RoomQueries.RoomQueryRequests;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
@@ -8,6 +9,7 @@ namespace Api.Controllers;
 public class RoomsController(IMediator mediator) : BaseController(mediator)
 {
     [HttpGet]
+    [Authorize(Roles = "Guest,Admin")]
     public async Task<IActionResult> GetAllAsync([FromQuery] GetAllRoomsQuery request,
         CancellationToken cancellationToken)
     {
@@ -16,6 +18,7 @@ public class RoomsController(IMediator mediator) : BaseController(mediator)
     }
 
     [HttpGet("{id:guid}")]
+    [Authorize(Roles = "Guest,Admin")]
     public async Task<IActionResult> GetByIdAsync([FromRoute] Guid id, CancellationToken cancellationToken)
     {
         var request = new GetRoomByIdQuery() { RoomId = id };
@@ -24,6 +27,7 @@ public class RoomsController(IMediator mediator) : BaseController(mediator)
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> InsertAsync([FromBody] InsertRoomCommand request,
         CancellationToken cancellationToken)
     {
@@ -32,6 +36,7 @@ public class RoomsController(IMediator mediator) : BaseController(mediator)
     }
 
     [HttpPut("{id:guid}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> UpdateAsync([FromRoute] Guid id, [FromBody] UpdateRoomCommand request,
         CancellationToken cancellationToken)
     {
@@ -41,6 +46,7 @@ public class RoomsController(IMediator mediator) : BaseController(mediator)
     }
 
     [HttpDelete("{id:guid}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> DeleteAsync([FromRoute] Guid id, CancellationToken cancellationToken)
     {
         var request = new DeleteRoomCommand { RoomId = id };

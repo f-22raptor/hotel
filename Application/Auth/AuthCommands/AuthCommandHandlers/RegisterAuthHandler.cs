@@ -1,7 +1,7 @@
 using Application.Auth.AuthCommands.AuthCommandRequests;
-using Infrastructure.Repositories;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace Application.Auth.AuthCommands.AuthCommandHandlers;
 
@@ -9,16 +9,21 @@ public class RregisterAuthHandler(UserManager<IdentityUser> userManager) : IRequ
 {
     public async Task<bool> Handle(RegisterAuthCommand request, CancellationToken cancellationToken)
     {
+        var existingUser = await userManager.Users.FirstOrDefaultAsync(u => u.PhoneNumber == request.PhoneNumber,
+            cancellationToken);
+        if (existingUser != null)
+            return false;
+
         var user = new IdentityUser
         {
-            PhoneNumber = request.PhoneNumber
+            PhoneNumber = request.PhoneNumber,
+            UserName = request.PhoneNumber
         };
         var result = await userManager.CreateAsync(user, request.Password);
-        if (!result.Succeeded || request.Roles.Length == 0)
+        if (!result.Succeeded)
             return false;
-        result = await userManager.AddToRolesAsync(user, request.Roles);
-        if (result.Succeeded)
-            return true;
-        return false;
+
+        result = await userManager.AddToRoleAsync(user, "Guest");
+        return result.Succeeded;
     }
 }

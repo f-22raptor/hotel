@@ -1,12 +1,13 @@
-using Application.Auth.AuthCommands;
 using Application.Auth.AuthCommands.AuthCommandRequests;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
 
 public class AuthController(IMediator mediator) : BaseController(mediator)
 {
+    [AllowAnonymous]
     [HttpPost("Register")]
     public async Task<IActionResult> Register([FromBody] RegisterAuthCommand request)
     {
@@ -14,6 +15,7 @@ public class AuthController(IMediator mediator) : BaseController(mediator)
         return result ? Ok() : BadRequest();
     }
 
+    [AllowAnonymous]
     [HttpPost("Login")]
     public async Task<IActionResult> Login([FromBody] LoginAuthCommand request)
     {
