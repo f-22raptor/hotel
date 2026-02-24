@@ -1,0 +1,33 @@
+using Application.Auth.AuthCommands.AuthCommandRequests;
+using Application.Auth.AuthDtos;
+using Application.Result;
+using Infrastructure.Repositories;
+using MediatR;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+
+namespace Application.Auth.AuthCommands.AuthCommandHandlers;
+
+public class LoginAuthHandler(UserManager<IdentityUser> userManager, ITokenRepository tokenRepository)
+    : IRequestHandler<LoginAuthCommand, Result<LoginAuthDto>>
+{
+    public async Task<Result<LoginAuthDto>> Handle(LoginAuthCommand request, CancellationToken cancellationToken)
+    {
+        var user = await userManager.Users.FirstOrDefaultAsync(u => u.PhoneNumber == request.PhoneNumber);
+        if (user == null)
+            return Result<LoginAuthDto>.Failure($"user not found", 404);
+        var checkPassword = await userManager.CheckPasswordAsync(user, request.Password);
+        if (checkPassword)
+        {
+            var roles = await userManager.GetRolesAsync(user);
+            if (roles.Count != 0)
+            {
+                var jwt = tokenRepository.CreateJwt(user, roles.ToList());
+                var response = new LoginAuthDto { Jwt = jwt };
+                return Result<LoginAuthDto>.Success(response);
+            }
+        }
+
+        return Result<LoginAuthDto>.Failure($"login failed", 400);
+    }
+}
