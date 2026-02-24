@@ -31,33 +31,5 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             .WithMany(g => g.Reservations)
             .HasForeignKey(r => r.GuestId)
             .OnDelete(DeleteBehavior.Restrict);
-        //
-        // modelBuilder.Entity<Room>()
-        //     .HasIndex(r => new { r.HotelId, r.Number })
-        //     .IsUnique();
-        //
-        // modelBuilder.Entity<Guest>()
-        //     .HasIndex(g => g.Email)
-        //     .IsUnique();
-        //
-        // modelBuilder.Entity<Guest>()
-        //     .Property(g => g.Email)
-        //     .HasMaxLength(320);
-        //
-        // modelBuilder.Entity<Guest>()
-        //     .Property(g => g.FullName)
-        //     .HasMaxLength(200);
-        //
-        // modelBuilder.Entity<Guest>()
-        //     .Property(g => g.PhoneNumber)
-        //     .HasMaxLength(30);
-        //
-        // modelBuilder.Entity<Hotel>()
-        //     .Property(h => h.Name)
-        //     .HasMaxLength(200);
-        //
-        // modelBuilder.Entity<Hotel>()
-        //     .Property(h => h.Address)
-        //     .HasMaxLength(500);
     }
 }

@@ -1,3 +1,4 @@
+using Application.Result;
 using Application.Rooms.RoomDtos;
 using Application.Rooms.RoomQueries.RoomQueryRequests;
 using AutoMapper;
@@ -7,9 +8,11 @@ using MediatR;
 
 namespace Application.Rooms.RoomQueries.RoomQueryHandlers;
 
-public class GetAllRoomsHandlerAsync(IRoomRepository roomRepository, IMapper mapper) : IRequestHandler<GetAllRoomsQuery, ICollection<RoomDto>>
+public class GetAllRoomsHandler(IRoomRepository roomRepository, IMapper mapper)
+    : IRequestHandler<GetAllRoomsQuery, ICollection<RoomDto>>
 {
-    public async Task<ICollection<RoomDto>> Handle(GetAllRoomsQuery request, CancellationToken cancellationToken)
+    public async Task<ICollection<RoomDto>> Handle(GetAllRoomsQuery request,
+        CancellationToken cancellationToken)
     {
         var rooms = await roomRepository.GetAllAsync(
             cancellationToken,
@@ -20,6 +23,6 @@ public class GetAllRoomsHandlerAsync(IRoomRepository roomRepository, IMapper map
             pageNumber: request.PageNumber,
             pageSize: request.PageSize);
         var roomDtos = mapper.Map<List<RoomDto>>(rooms);
-        return  roomDtos;
+        return roomDtos;
     }
 }

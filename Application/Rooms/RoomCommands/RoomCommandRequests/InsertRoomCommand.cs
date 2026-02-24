@@ -1,10 +1,11 @@
+using Application.Result;
 using Application.Rooms.RoomDtos;
 using Domain.Enums;
 using MediatR;
 
 namespace Application.Rooms.RoomCommands.RoomCommandRequests;
 
-public class InsertRoomCommand : IRequest<RoomDto?>
+public class InsertRoomCommand : IRequest<Result<RoomDto>>
 {
     public int Number { get; set; }
     public RoomType Type { get; set; }

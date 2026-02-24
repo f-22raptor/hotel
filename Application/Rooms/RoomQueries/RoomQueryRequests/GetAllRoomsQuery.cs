@@ -7,7 +7,6 @@ public class GetAllRoomsQuery : IRequest<ICollection<RoomDto>>
 {
     // filtering
     public string? FilterOn { get; set; }
-    public string? FilterOff { get; set; }
     public string? FilterQuery { get; set; }
     // sorting
     public string? OrderBy { get; set; }

@@ -1,3 +1,4 @@
+using Application.Result;
 using Application.Rooms.RoomCommands.RoomCommandRequests;
 using Application.Rooms.RoomDtos;
 using AutoMapper;
@@ -7,15 +8,26 @@ using MediatR;
 
 namespace Application.Rooms.RoomCommands.RoomCommandHandlers;
 
-public class UpdateRoomHandler(IRoomRepository roomRepository, IMapper mapper) : IRequestHandler<UpdateRoomCommand, RoomDto?>
+public class UpdateRoomHandler(IRoomRepository roomRepository, IHotelRepository hotelRepository, IMapper mapper)
+    : IRequestHandler<UpdateRoomCommand, Result<RoomDto>>
 {
-    public async Task<RoomDto?> Handle(UpdateRoomCommand request, CancellationToken cancellationToken)
+    public async Task<Result<RoomDto>> Handle(UpdateRoomCommand request, CancellationToken cancellationToken)
     {
-        var room = mapper.Map<Room>(request);
-        await roomRepository.UpdateAsync(room, cancellationToken);
+        var errorMessage = "";
+        var room = await roomRepository.GetByIdAsync(request.Id, cancellationToken); 
         if (room == null)
-            return null;
-        var roomDto = mapper.Map<RoomDto>(room);
-        return roomDto;
+            errorMessage += $"room {request.Id} not found";
+        if (request.HotelId != null &&
+            await hotelRepository.GetByIdAsync(request.HotelId.Value, cancellationToken) == null)
+            errorMessage += $"hotel {request.HotelId} not found";
+        if (errorMessage != "")
+            return Result<RoomDto>.Failure(errorMessage, 404);
+        
+        mapper.Map(request, room);
+        var updatedRoom = await roomRepository.UpdateAsync(room, cancellationToken);
+        if (updatedRoom == null)
+            return Result<RoomDto>.Failure($"update room failed", 400);
+        var updatedRoomDto = mapper.Map<RoomDto>(updatedRoom);
+        return Result<RoomDto>.Success(updatedRoomDto);
     }
 }

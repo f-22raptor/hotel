@@ -1,3 +1,4 @@
+using Api.MiddleWares;
 using Application;
 using Application.Behaviors;
 using Domain.Repositories;
@@ -33,6 +34,8 @@ builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
 builder.Services.AddScoped<IGuestRepository, GuestRepository>();
 
 var app = builder.Build();
+
+app.UseMiddleware<ExceptionMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

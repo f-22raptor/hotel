@@ -7,29 +7,38 @@ namespace Infrastructure.Repositories;
 
 public class RoomRepository(AppDbContext context) : BaseRepository<Room, Guid>(context), IRoomRepository
 {
-    private async Task<bool> IsRoomNumberUniqueAsync(Room room, CancellationToken cancellationToken)
+    public async Task<bool> IsRoomNumberUniqueAsync(Guid hotelId, int roomNumber, CancellationToken cancellationToken)
     {
         var isRoomNumberUnique =
-            !await context.Rooms.AnyAsync(r => r.Number == room.Number, cancellationToken);
+            !await context.Rooms.AnyAsync(r => r.HotelId == hotelId && r.Number == roomNumber, cancellationToken);
         return isRoomNumberUnique;
     }
-    
+
     public override async Task<Room?> InsertAsync(Room entity, CancellationToken cancellationToken)
     {
-        var isRoomNumberUnique = await IsRoomNumberUniqueAsync(entity, cancellationToken);
-        if (!isRoomNumberUnique)
-            return null;
+        if (entity.HotelId != null)
+        {
+            var isRoomNumberUnique =
+                await IsRoomNumberUniqueAsync(entity.HotelId.Value, entity.Number, cancellationToken);
+            if (!isRoomNumberUnique)
+                return null;
+        }
         return await base.InsertAsync(entity, cancellationToken);
     }
 
     public override async Task<Room?> UpdateAsync(Room entity, CancellationToken cancellationToken)
     {
-        var isRoomNumberUnique = await IsRoomNumberUniqueAsync(entity, cancellationToken);
-        if (!isRoomNumberUnique)
-            return null;
+        if (entity.HotelId != null)
+        {
+            var isRoomNumberUnique =
+                await IsRoomNumberUniqueAsync(entity.HotelId.Value, entity.Number, cancellationToken);
+            if (!isRoomNumberUnique)
+                return null;
+        }
+
         return await base.UpdateAsync(entity, cancellationToken);
     }
-    
+
     protected override IQueryable<Room> CustomContext()
     {
         return context.Rooms.Include(r => r.Hotel).Include(r => r.Reservations);
