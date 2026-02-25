@@ -1,18 +1,20 @@
 using Application.Auth.AuthCommands.AuthCommandRequests;
+using Application.Auth.AuthDtos;
+using Application.Result;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace Application.Auth.AuthCommands.AuthCommandHandlers;
 
-public class RregisterAuthHandler(UserManager<IdentityUser> userManager) : IRequestHandler<RegisterAuthCommand, bool>
+public class RregisterAuthHandler(UserManager<IdentityUser> userManager) : IRequestHandler<RegisterAuthCommand, Result<RegisterAuthDto>>
 {
-    public async Task<bool> Handle(RegisterAuthCommand request, CancellationToken cancellationToken)
+    public async Task<Result<RegisterAuthDto>> Handle(RegisterAuthCommand request, CancellationToken cancellationToken)
     {
         var existingUser = await userManager.Users.FirstOrDefaultAsync(u => u.PhoneNumber == request.PhoneNumber,
             cancellationToken);
         if (existingUser != null)
-            return false;
+            return Result<RegisterAuthDto>.Failure($"user {existingUser.PhoneNumber} is already registered", 400);
 
         var user = new IdentityUser
         {
@@ -21,9 +23,19 @@ public class RregisterAuthHandler(UserManager<IdentityUser> userManager) : IRequ
         };
         var result = await userManager.CreateAsync(user, request.Password);
         if (!result.Succeeded)
-            return false;
+            return Result<RegisterAuthDto>.Failure("user register failed", 400);
 
         result = await userManager.AddToRoleAsync(user, "Guest");
-        return result.Succeeded;
+        if (result.Succeeded)
+        {
+            var registerAuthDto = new RegisterAuthDto
+            {
+                Id = Guid.Parse(user.Id),
+                PhoneNumber = user.PhoneNumber,
+                Roles = ["Guest"]
+            };
+            return Result<RegisterAuthDto>.Success(registerAuthDto);
+        }
+        return Result<RegisterAuthDto>.Failure("user register failed", 400);
     }
 }

@@ -12,6 +12,6 @@ public class Reservation : IBaseModel<Guid>
     public Guid? GuestId { get; set; }
     public Guid? RoomId { get; set; }
     // navigation property
-    public Guest? Guest { get; set; }
+    // public IdentityUser? Guest { get; set; }
     public Room? Room { get; set; }
 }

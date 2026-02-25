@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,7 +18,8 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+// builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options => { options.CustomSchemaIds(type => type.FullName); });
 // MediatR
 builder.Services.AddMediatR(cfg =>
 {
@@ -63,7 +65,7 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Password.RequireLowercase = false;
     options.Password.RequireNonAlphanumeric = false;
     options.Password.RequireUppercase = false;
-    options.Password.RequiredLength = 3;
+    options.Password.RequiredLength = 4;
     options.Password.RequiredUniqueChars = 1;
 });
 
@@ -81,7 +83,7 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     // Scalar
-    // app.MapScalarApiReference();    
+    app.MapScalarApiReference();
     // Swagger
     app.UseSwagger();
     app.UseSwaggerUI();

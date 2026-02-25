@@ -31,7 +31,7 @@ public class TokenRepository(IConfiguration configuration) : ITokenRepository
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(keyValue));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-        var expires = DateTime.UtcNow.AddMinutes(15);
+        var expires = DateTime.UtcNow.AddMinutes(150);
 
         var token = new JwtSecurityToken(
             issuer: issuer,

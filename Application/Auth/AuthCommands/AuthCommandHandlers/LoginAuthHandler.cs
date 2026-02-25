@@ -13,19 +13,23 @@ public class LoginAuthHandler(UserManager<IdentityUser> userManager, ITokenRepos
 {
     public async Task<Result<LoginAuthDto>> Handle(LoginAuthCommand request, CancellationToken cancellationToken)
     {
-        var user = await userManager.Users.FirstOrDefaultAsync(u => u.PhoneNumber == request.PhoneNumber);
+        var user = await userManager.Users.FirstOrDefaultAsync(u => u.PhoneNumber == request.PhoneNumber,
+            cancellationToken: cancellationToken);
         if (user == null)
             return Result<LoginAuthDto>.Failure($"user not found", 404);
         var checkPassword = await userManager.CheckPasswordAsync(user, request.Password);
         if (checkPassword)
         {
             var roles = await userManager.GetRolesAsync(user);
-            if (roles.Count != 0)
+
+            var jwt = tokenRepository.CreateJwt(user, roles.ToList());
+            var response = new LoginAuthDto
             {
-                var jwt = tokenRepository.CreateJwt(user, roles.ToList());
-                var response = new LoginAuthDto { Jwt = jwt };
-                return Result<LoginAuthDto>.Success(response);
-            }
+                Roles = roles,
+                Id = Guid.Parse(user.Id),
+                Jwt = jwt
+            };
+            return Result<LoginAuthDto>.Success(response);
         }
 
         return Result<LoginAuthDto>.Failure($"login failed", 400);

@@ -9,15 +9,15 @@ public class AuthController(IMediator mediator) : BaseController(mediator)
 {
     [AllowAnonymous]
     [HttpPost("Register")]
-    public async Task<IActionResult> Register([FromBody] RegisterAuthCommand request)
+    public async Task<IActionResult> RegisterAsync([FromBody] RegisterAuthCommand request)
     {
         var result = await mediator.Send(request);
-        return result ? Ok() : BadRequest();
+        return HandleResult(result);
     }
 
     [AllowAnonymous]
     [HttpPost("Login")]
-    public async Task<IActionResult> Login([FromBody] LoginAuthCommand request)
+    public async Task<IActionResult> LoginAsync([FromBody] LoginAuthCommand request)
     {
         var result = await mediator.Send(request);
         return HandleResult(result);

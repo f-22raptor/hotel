@@ -7,7 +7,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 {
     public DbSet<Room> Rooms { get; set; }
     public DbSet<Hotel> Hotels { get; set; }
-    public DbSet<Guest> Guests { get; set; }
+    // public DbSet<Guest> Guests { get; set; }
     public DbSet<Reservation> Reservations { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -26,10 +26,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             .HasForeignKey(r => r.RoomId)
             .OnDelete(DeleteBehavior.Restrict);
             
-        modelBuilder.Entity<Reservation>()
-            .HasOne(r => r.Guest)
-            .WithMany(g => g.Reservations)
-            .HasForeignKey(r => r.GuestId)
-            .OnDelete(DeleteBehavior.Restrict);
+        // modelBuilder.Entity<Reservation>()
+        //     .HasOne(r => r.Guest)
+        //     .WithMany(g => g.Reservations)
+        //     .HasForeignKey(r => r.GuestId)
+        //     .OnDelete(DeleteBehavior.Restrict);
     }
 }

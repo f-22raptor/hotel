@@ -2,21 +2,43 @@ using Domain.Models;
 using Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
+using Microsoft.EntityFrameworkCore.Query;
 
 namespace Infrastructure.Repositories;
 
 public class ReservationRepository(AppDbContext context)
     : BaseRepository<Reservation, Guid>(context), IReservationRepository
 {
+    public async Task<bool> IsReservedAsync(Guid roomId, DateTimeOffset checkInDate, Guid? guestId = null)
+    {
+        if (guestId == null)
+        {
+            var isReserved = await context.Reservations.AnyAsync(r =>
+                r.RoomId == roomId && r.CheckInDate <= checkInDate && checkInDate <= r.CheckOutDate);
+            return isReserved;
+        }
+        else
+        {
+            var isReserved = await context.Reservations.AnyAsync(r =>
+                r.RoomId == roomId && r.CheckInDate <= checkInDate && checkInDate <= r.CheckOutDate &&
+                r.GuestId != guestId);
+            return isReserved;
+        }
+    }
+
     protected override IQueryable<Reservation> CustomContext()
     {
         return context.Reservations
             .Include(r => r.Room);
+        // .Include(r => r.Guest);
     }
 
     protected override IQueryable<Reservation> CustomFilter(IQueryable<Reservation> query, string? filterOn,
         string? filterQuery)
     {
+        if (filterOn.Equals("GuestId", StringComparison.OrdinalIgnoreCase))
+            query = query.Where(r => r.GuestId.ToString().Equals(filterQuery));
+
         return query;
     }
 
@@ -31,7 +53,7 @@ public class ReservationRepository(AppDbContext context)
                     ? query.OrderBy(r => r.TotalPrice)
                     : query.OrderByDescending(r => r.TotalPrice);
         }
-        
+
         return query;
     }
 }
