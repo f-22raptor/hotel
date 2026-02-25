@@ -28,8 +28,8 @@ public class AutoMapperProfiles : Profile
             .ForMember(dst => dst.RoomDto, opt => opt.MapFrom(src => src.Room));
         CreateMap<InsertReservationCommand, Reservation>();
         CreateMap<UpdateReservationCommand, Reservation>();
-        CreateMap<InsertReservationCommandDto, InsertReservationCommand>();
-        CreateMap<UpdateReservationCommandDto, UpdateReservationCommand>();
+        CreateMap<InsertReservationCommandDto, InsertReservationCommand>().ReverseMap();
+        CreateMap<UpdateReservationCommandDto, UpdateReservationCommand>().ReverseMap();
         // guest
     }
 }

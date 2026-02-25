@@ -74,6 +74,7 @@ public class ReservationsController(IMediator mediator, IMapper mapper) : BaseCo
         if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var guestId))
             return Unauthorized();
 
+        request.ReservationId = id;
         var request2 = mapper.Map<UpdateReservationCommand>(request);
         request2.GuestId = guestId;
         var result = await mediator.Send(request2, cancellationToken);
